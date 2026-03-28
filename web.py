@@ -11,7 +11,7 @@ def index():
     link += "<a href=/me>關於我</a><hr>"
     link += "<a href=/welcome?u=睿謙&d=靜宜>Get傳值</a><hr>"
     link += "<a href=/account>POST</a><hr>"
-    link += "<a href=/math>√∧</a><hr>"
+    link += "<a href=/math>次方與根號計算</a><hr>"
     return link
 
 @app.route("/mis")
@@ -47,6 +47,8 @@ def account():
 
 @app.route("/math", methods=["GET", "POST"])
 def math():
+    result = None
+
     if request.method == "POST":
         x = int(request.form["x"])
         y = int(request.form["y"])
@@ -62,9 +64,7 @@ def math():
         else:
             result = "請輸入 ^ 或 √"
 
-        return f"結果是：{result}"
-
-    return render_template("math.html")
+    return render_template("math.html", result=result)
 
 
 if __name__ == "__main__":
