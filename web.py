@@ -46,9 +46,12 @@ def index():
 def read():
     result = ""
     collection_ref = db.collection("靜宜資管2026B")
-    docs = collection_ref.get()
+
+    docs = collection_ref.order_by("lab", direction=firestore.Query.DESCENDING).get()
+
     for doc in docs:
         result += str(doc.to_dict()) + "<br>"
+
     return result
 
 
