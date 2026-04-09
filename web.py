@@ -7,15 +7,20 @@ from firebase_admin import credentials, firestore
 
 # 判斷是在 Vercel 還是本地
 if os.path.exists('serviceAccountKey.json'):
-    # 本地環境：讀取檔案
-    cred = credentials.Certificate('serviceAccountKey.json')
-else:
-    # 雲端環境：從環境變數讀取 JSON 字串
+    
     firebase_config = os.getenv('FIREBASE_CONFIG')
-    cred_dict = json.loads(firebase_config)
-    cred = credentials.Certificate(cred_dict)
 
-firebase_admin.initialize_app(cred)
+    if firebase_config is not None:
+        # 雲端環境：確認抓到環境變數後再解析
+        cred_dict = json.loads(firebase_config)
+        cred = credentials.Certificate(cred_dict)
+    elif os.path.exists('serviceAccountKey.json'):
+        # 本地環境：如果環境變數是 None，改找實體檔案
+        cred = credentials.Certificate('serviceAccountKey.json')
+    else:
+        # 兩者都失敗：拋出清楚的錯誤，不要讓 json.loads 崩潰
+        raise ValueError("找不到 Firebase 金鑰！請檢查 Vercel 環境變數或 serviceAccountKey.json 檔案。")
+    firebase_admin.initialize_app(cred)
 
 
 app = Flask(__name__)
