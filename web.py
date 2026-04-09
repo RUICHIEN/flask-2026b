@@ -1,29 +1,34 @@
-from flask import Flask, render_template,request
+from flask import Flask, render_template, request
 from datetime import datetime
 import os
 import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# 判斷是在 Vercel 還是本地
-if os.path.exists('serviceAccountKey.json'):
-    
-    firebase_config = os.getenv('FIREBASE_CONFIG')
+def init_firebase():
+    if firebase_admin._apps:
+        return firestore.client()
 
-    if firebase_config is not None:
-        # 雲端環境：確認抓到環境變數後再解析
+    firebase_config = os.getenv("FIREBASE_CONFIG")
+
+    if firebase_config:
+        # Vercel 環境變數
         cred_dict = json.loads(firebase_config)
         cred = credentials.Certificate(cred_dict)
-    elif os.path.exists('serviceAccountKey.json'):
-        # 本地環境：如果環境變數是 None，改找實體檔案
-        cred = credentials.Certificate('serviceAccountKey.json')
+    elif os.path.exists("serviceAccountKey.json"):
+        # 本地實體金鑰檔
+        cred = credentials.Certificate("serviceAccountKey.json")
     else:
-        # 兩者都失敗：拋出清楚的錯誤，不要讓 json.loads 崩潰
-        raise ValueError("找不到 Firebase 金鑰！請檢查 Vercel 環境變數或 serviceAccountKey.json 檔案。")
-    firebase_admin.initialize_app(cred)
+        raise ValueError("找不到 Firebase 金鑰：請確認 Vercel 的 FIREBASE_CONFIG 或本地 serviceAccountKey.json")
 
+    firebase_admin.initialize_app(cred)
+    return firestore.client()
+
+db = init_firebase()
 
 app = Flask(__name__)
+
+print("FIREBASE_CONFIG exists:", os.getenv("FIREBASE_CONFIG") is not None)
 
 @app.route("/")
 def index():
@@ -39,13 +44,12 @@ def index():
 
 @app.route("/read")
 def read():
-    Result = ""
-    db = firestore.client()
-    collection_ref = db.collection("靜宜資管2026B")    
-    docs = collection_ref.get()    
-    for doc in docs:         
-        Result += str(doc.to_dict()) + "<br>"    
-    return Result
+    result = ""
+    collection_ref = db.collection("靜宜資管2026B")
+    docs = collection_ref.get()
+    for doc in docs:
+        result += str(doc.to_dict()) + "<br>"
+    return result
 
 
 @app.route("/mis")
