@@ -44,8 +44,8 @@ def index():
     link += "<a href=/account>POST</a><hr>"
     link += "<a href=/math>次方與根號計算</a><hr>"
     link += "<a href=/read>讀取Firestore資料</a><br><hr>"
-    link += "<a href=/read3>讀取Firestore資料(根據姓名關鍵字:楊)</a></br></hr>"
-    link += "<a href=/spider1>爬取子青老師本學期課程</a></br></hr>"
+    link += "<a href=/read3>讀取Firestore資料(根據姓名關鍵字:楊)</a><br><hr>"
+    link += "<a href=/spider1>爬取子青老師本學期課程</a><br><hr>"
     return link
 
 @app.route("/spider1")
@@ -65,16 +65,26 @@ def spider1():
 @app.route("/read3")
 def read3():
     R = ""
-    keyword = '楊'
+    keyword = request.args.get("keyword", "").strip()
+
+    if keyword == "":
+        return "請輸入老師姓名關鍵字:"
+
     db = firestore.client()
     collection_ref = db.collection("靜宜資管2026B")
     docs = collection_ref.get()
+
     for doc in docs:
         teacher = doc.to_dict()
+
         if 'name' in teacher and teacher['name'] and keyword in teacher['name']:
-            R += str(teacher) + "<br>"
+            name = teacher.get('name', '無資料')
+            lab = teacher.get('lab', '無研究室資料')
+            R += f"老師姓名：{name}，研究室：{lab}<br>"
+
     if R == '':
-        R='抱歉，查無此關鍵字姓名之老師資料'
+        R = '抱歉，查無此關鍵字姓名之老師資料'
+
     return R
 @app.route("/read")
 def read():
