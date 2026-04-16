@@ -1,5 +1,9 @@
+import requests
+from bs4 import BeautifulSoup
+
 from flask import Flask, render_template, request
 from datetime import datetime
+
 import os
 import json
 import firebase_admin
@@ -43,17 +47,17 @@ def index():
     link += "<a href=/read3>讀取Firestore資料(根據姓名關鍵字:楊)</a><br>"
     return link
 
-@app.route("/read2")
-def read3()
-    result = ""
+@app.route("/read3")
+def read3():
+    Result = ""
     keyword = '楊'
     db = firestore.client()
     collection_ref = db.collection("靜宜資管2026B")
     docs = collection_ref.get()
     for doc in docs:
         teacher = doc.to_dict()
-        if keyword in teacher['name']:
-        Result += str(teacher) + "<br>"
+        if 'name' in teacher and keyword in teacher['name']:
+            Result += str(teacher) + "<br>"
     if Result == '':
         Result='抱歉，查無此關鍵字姓名之老師資料'
     return Result
