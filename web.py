@@ -43,13 +43,28 @@ def index():
     link += "<a href=/welcome?u=睿謙&d=靜宜>Get傳值</a><hr>"
     link += "<a href=/account>POST</a><hr>"
     link += "<a href=/math>次方與根號計算</a><hr>"
-    link += "<a href=/read>讀取Firestore資料</a><br>"
-    link += "<a href=/read3>讀取Firestore資料(根據姓名關鍵字:楊)</a><br>"
+    link += "<a href=/read>讀取Firestore資料</a><br><hr>"
+    link += "<a href=/read3>讀取Firestore資料(根據姓名關鍵字:楊)</a><br><hr>"
+    link += "<a href=/spider1>爬取子青老師本學期課程</a><br><hr>"
     return link
+
+@app.route("/spider1")
+def read3():
+    Result = ""
+    url = 'https://www1.pu.edu.tw/~tcyang/course.html'
+    Data = requests.get(url)
+    Data.encoding='utf-8'
+    # print(Data.text)
+    sp = BeautifulSoup(Data.text, "html.parser")
+    result=sp.select(".team-box a")
+
+    for i in result:
+        R += str(i.text), i.get('href') + "<br>"
+    return R
 
 @app.route("/read3")
 def read3():
-    Result = ""
+    R = ""
     keyword = '楊'
     db = firestore.client()
     collection_ref = db.collection("靜宜資管2026B")
