@@ -49,8 +49,8 @@ def index():
     return link
 
 @app.route("/spider1")
-def read3():
-    Result = ""
+def spider1():
+    R = ""
     url = 'https://www1.pu.edu.tw/~tcyang/course.html'
     Data = requests.get(url)
     Data.encoding='utf-8'
@@ -59,7 +59,7 @@ def read3():
     result=sp.select(".team-box a")
 
     for i in result:
-        R += str(i.text), i.get('href') + "<br>"
+        R += i.text + " " + i.get('href') + "<br>"
     return R
 
 @app.route("/read3")
@@ -72,10 +72,10 @@ def read3():
     for doc in docs:
         teacher = doc.to_dict()
         if 'name' in teacher and keyword in teacher['name']:
-            Result += str(teacher) + "<br>"
-    if Result == '':
-        Result='抱歉，查無此關鍵字姓名之老師資料'
-    return Result
+            R += str(teacher) + "<br>"
+    if R == '':
+        R='抱歉，查無此關鍵字姓名之老師資料'
+    return R
 @app.route("/read")
 def read():
     result = ""
