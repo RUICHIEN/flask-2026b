@@ -44,7 +44,7 @@ def index():
     link += "<a href=/account>POST</a><hr>"
     link += "<a href=/math>次方與根號計算</a><hr>"
     link += "<a href=/read>讀取Firestore資料</a><br><hr>"
-    link += "<a href=/read3>讀取Firestore資料(根據姓名關鍵字:楊)</a><br><hr>"
+    link += "<a href=/read3>讀取Firestore資料(根據姓名關鍵字)</a><br><hr>"
     link += "<a href=/spider1>爬取子青老師本學期課程</a><br><hr>"
     return link
 
@@ -62,17 +62,34 @@ def spider1():
         R += i.text + " " + i.get('href') + "<br>"
     return R
 
-@app.route("/read3")
+@app.route("/read3", methods=["GET"])
 def read3():
-    R = ""
     keyword = request.args.get("keyword", "").strip()
 
+    # 🔹 上半部（標題 + 輸入框）
+    html = """
+    <h1>靜宜資管老師查詢</h1>
+
+    <form method="get">
+        請輸入老師姓名關鍵字：
+        <input type="text" name="keyword" value="{keyword}">
+        <input type="submit" value="查詢">
+    </form>
+
+    <hr>
+    """.format(keyword=keyword)
+
+    # 🔹 如果還沒輸入
     if keyword == "":
-        return "請輸入老師姓名關鍵字:"
+        return html
+
+    # 🔹 查詢結果標題
+    html += f"<h2>查詢結果（關鍵字：{keyword}）：</h2>"
 
     db = firestore.client()
-    collection_ref = db.collection("靜宜資管2026B")
-    docs = collection_ref.get()
+    docs = db.collection("靜宜資管2026B").get()
+
+    found = False
 
     for doc in docs:
         teacher = doc.to_dict()
@@ -80,12 +97,23 @@ def read3():
         if 'name' in teacher and teacher['name'] and keyword in teacher['name']:
             name = teacher.get('name', '無資料')
             lab = teacher.get('lab', '無研究室資料')
-            R += f"老師姓名：{name}，研究室：{lab}<br>"
 
-    if R == '':
-        R = '抱歉，查無此關鍵字姓名之老師資料'
+            html += f"""
+            <p>
+            <span style="color:blue; font-weight:bold;">{name}</span>
+            老師的研究室在 <b>{lab}</b>
+            </p>
+            <hr>
+            """
+            found = True
 
-    return R
+    if not found:
+        html += "<p>抱歉，查無此關鍵字姓名之老師資料</p>"
+
+    # 🔹 返回首頁
+    html += '<br><a href="/">返回首頁</a>'
+
+    return html
 @app.route("/read")
 def read():
     result = ""
