@@ -46,7 +46,24 @@ def index():
     link += "<a href=/read>讀取Firestore資料</a><br><hr>"
     link += "<a href=/read3>讀取Firestore資料(根據姓名關鍵字)</a><br><hr>"
     link += "<a href=/spider1>爬取子青老師本學期課程</a><br><hr>"
+    link += "<a href=/movie2>爬取即將上映電影</a><br><hr>"
     return link
+
+
+@app.route("/movie2")
+def movie2():
+    R = ""
+    url = "https://www.atmovies.com.tw/movie/next/"
+    Data = requests.get(url)
+    Data.encoding = "utf-8"
+    #print(Data.text)
+    sp = BeautifulSoup(Data.text, "html.parser")
+    result=sp.select('.filmListAllX li')
+    for item in result:
+        R +=item.find('img').get('alt') + '<br>'
+        R +='https://www.atmovies.com.tw'+ item.find('a').get('href')+ '<br>'
+        R +='https://www.atmovies.com.tw'+item.find('img').get('src')+ '<br><br>'
+    return R
 
 @app.route("/spider1")
 def spider1():
