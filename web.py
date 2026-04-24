@@ -50,20 +50,59 @@ def index():
     return link
 
 
-@app.route("/movie2")
+@app.route("/movie2", methods=["GET"])
 def movie2():
-    R = ""
+    keyword = request.args.get("keyword", "").strip()
+
+    html = """
+    <h1>即將上映電影查詢</h1>
+
+    <form method="get">
+        請輸入電影片名關鍵字：
+        <input type="text" name="keyword" value="{keyword}">
+        <input type="submit" value="查詢">
+    </form>
+
+    <hr>
+    """.format(keyword=keyword)
+
     url = "https://www.atmovies.com.tw/movie/next/"
     Data = requests.get(url)
     Data.encoding = "utf-8"
-    #print(Data.text)
+
     sp = BeautifulSoup(Data.text, "html.parser")
-    result=sp.select('.filmListAllX li')
+    result = sp.select(".filmListAllX li")
+
+    found = False
+
     for item in result:
-        introduce = 'https://www.atmovies.com.tw'+ item.find('a').get('href')
-        R +='<a href='+ introduce + '>' + item.find('img').get('alt') + '</a><br>'
-        R +='https://www.atmovies.com.tw'+item.find('img').get('src')+ '<br><br>'
-    return R
+        a_tag = item.find("a")
+        img_tag = item.find("img")
+
+        if a_tag and img_tag:
+            title = img_tag.get("alt")
+            introduce = "https://www.atmovies.com.tw" + a_tag.get("href")
+            poster = "https://www.atmovies.com.tw" + img_tag.get("src")
+
+            if keyword == "" or keyword in title:
+                html += f"""
+                <div style="margin-bottom:30px;">
+                    <h2>
+                        <a href="{introduce}" target="_blank">{title}</a>
+                    </h2>
+
+                    <img src="{poster}" alt="{title}" style="width:200px;">
+                </div>
+                <hr>
+                """
+                found = True
+
+    if not found:
+        html += "<p>查無符合條件的電影。</p>"
+
+    html += '<br><a href="/">返回首頁</a>'
+
+    return html
 
 @app.route("/spider1")
 def spider1():
