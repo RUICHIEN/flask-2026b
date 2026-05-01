@@ -48,7 +48,58 @@ def index():
     link += "<a href=/spider1>爬取子青老師本學期課程</a><br><hr>"
     link += "<a href=/movie2>爬取即將上映電影</a><br><hr>"
     link += "<a href=/spidermovie>爬取即將上映電影到firebase</a><br><hr>"
+    link += "<a href=/searchMovie>從firebase查電影</a><br><hr>"
     return link
+
+@app.route("/searchMovie")
+def searchMovie():
+    R = ""
+    keyword = request.args.get("keyword", "").strip()
+    R += f"""
+    <h1>電影資料庫查詢</h1>
+
+    <form method="get">
+        請輸入片名關鍵字：
+        <input type="text" name="keyword" value="{keyword}">
+        <input type="submit" value="查詢">
+    </form>
+
+    <hr>
+    """
+    if keyword == "":
+        return R
+
+    R += f"<h2>查詢結果（關鍵字：{keyword}）</h2>"
+
+    docs = db.collection("電影").get()
+
+    found = False
+
+    for doc in docs:
+        data = doc.to_dict()
+        title = data.get("title", "")
+        picture = data.get("picture", "")
+        hyperlink = data.get("hyperlink", "")
+        showDate = data.get("showDate", "")
+        
+        if keyword in title:
+        # if title.startswith(keyword):
+            R += f"""
+            <div>
+                <p><b>編號：</b>{doc.id}</p>
+                <h2>{title}</h2>
+                <img src="{picture}" style="width:200px;"><br>
+                <a href="{hyperlink}" target="_blank">介紹頁</a><br>
+                <p>上映日期：{showDate}</p>
+            </div>
+            <hr>
+            """
+            found = True
+
+    if not found:
+        R += "<p>查無符合條件的電影</p>"
+    R += '<br><a href="/">返回首頁</a>'
+    return R
 
 @app.route("/spidermovie")
 def spidermovie():
