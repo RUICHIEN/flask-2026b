@@ -65,7 +65,21 @@ def webhook():
     if (action == "rateChoice"):
         rate =  req["queryResult"]["parameters"]["rate"]
         info = "這是睿謙的機器人，您選擇的電影分級是：" + rate
-
+        docs = db.collection("本週新片含分級").where("rate", "==", rate).get()
+        movie_titles = []
+        for doc in docs:
+            data = doc.to_dict()
+            title = data.get("title", "")
+            if title != "":
+                movie_titles.append(title)
+        if len(movie_titles) == 0:
+            info += "\n目前查不到" + rate + "的本週上映電影。"
+        else:
+            info += "\n本週上映的" + rate + "電影有：\n"
+            info += "\n".join(movie_titles)
+    else:
+        info = "抱歉，我目前還無法處理這個查詢。"
+        
     return make_response(jsonify({"fulfillmentText": info}))
 
 
