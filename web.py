@@ -118,8 +118,9 @@ def webhook():
         else:
             info += "\n本週上映的" + rate + "電影有：\n"
             info += "\n".join(movie_titles)
-    else:
-        info = "抱歉，我目前還無法處理這個查詢。"
+    elif (action == "input.unknown"):
+        info =  req["queryResult"]["queryText"]
+
         
     return make_response(jsonify({"fulfillmentText": info}))
 
