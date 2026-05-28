@@ -34,7 +34,7 @@ db = init_firebase()
 
 app = Flask(__name__)
 
-client = ()
+client = genai.client()
 
 print("FIREBASE_CONFIG exists:", os.getenv("FIREBASE_CONFIG") is not None)
 # https://jsoneditoronline.org/#right=local.matizi&left=local.monusi
