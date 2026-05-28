@@ -9,6 +9,8 @@ import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+from google import genai
+
 def init_firebase():
     if firebase_admin._apps:
         return firestore.client()
@@ -32,8 +34,11 @@ db = init_firebase()
 
 app = Flask(__name__)
 
+client = ()
+
 print("FIREBASE_CONFIG exists:", os.getenv("FIREBASE_CONFIG") is not None)
 # https://jsoneditoronline.org/#right=local.matizi&left=local.monusi
+
 @app.route("/")
 def index():
     link = "<h1>這裡是睿謙的網站</h1>"
@@ -53,7 +58,19 @@ def index():
     link += "<a href=/weather>天氣預報</a><br><hr>"
     link += "<a href=/rate>本週新片進DB</a><br><hr>"
     link += "<a href=/web_demo>聊天機器人</a><br><hr>"
+
     return link
+
+@app.route("/AI")
+def AI():
+    # 每次使用者拜訪該路徑時，直接使用全域的 client 呼叫模型
+    response = client.models.generate_content(
+        model='gemini-3.5-flash',
+        contents='我想查詢靜宜大學資管系的評價？',
+    )
+    
+    # 回傳生成的文字
+    return response.text
 
 @app.route("/web_demo")
 def web_demo():
